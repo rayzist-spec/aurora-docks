@@ -1,0 +1,434 @@
+/**
+ * @name Aurora Docks
+ * @author rayzist-spec
+ * @description Lavender-dusk glass: your own artwork behind very transparent, softly blurred surfaces, with gradients sampled from the picture itself.
+ * @version 1.0.0
+ * @source https://github.com/rayzist-spec/aurora-docks
+ * @website https://github.com/rayzist-spec/aurora-docks
+ */
+
+/* ==========================================================================
+   Aurora Docks
+   --------------------------------------------------------------------------
+   A wallpaper theme for Discord, built for Vencord.
+
+   The picture ships with the theme, so nothing here depends on any other
+   theme being installed. Everything is driven by the variables below: change
+   one and the whole app follows.
+
+   Readability comes first. The surfaces are translucent, but they keep enough
+   of a dark base, and the wallpaper is pulled down behind the interface with
+   a dusk wash, so body text stays comfortable over the bright sky in the art.
+   ========================================================================== */
+
+:root {
+  /* ======================================================================
+     1. THE PICTURE
+     ----------------------------------------------------------------------
+     Swap this for any image URL and the whole theme follows. A local copy
+     ships in assets/wallpaper.jpg, served from the raw GitHub URL below so
+     Discord can load it (a file:// path will not work — Discord runs on
+     https and Chrome blocks local files from there).
+     ====================================================================== */
+  --aurora-wallpaper: url("https://raw.githubusercontent.com/rayzist-spec/aurora-docks/main/assets/wallpaper.jpg");
+
+  /* How the picture is framed. `center 22%` keeps the figure and the lavender
+     sky in view on a wide monitor instead of cropping to the dockyard floor. */
+  --aurora-wallpaper-position: center 22%;
+  --aurora-wallpaper-size: cover;
+
+  /* ======================================================================
+     2. THE PALETTE
+     ----------------------------------------------------------------------
+     Sampled from the artwork: the periwinkle sky, the violet shadows under
+     the gantries, the warm peach of the lit structures, and the coral that
+     picks out the small red details.
+     ====================================================================== */
+  --aurora-void: #100b1e;
+  --aurora-ink: #1a1230;
+  --aurora-plum: #291d47;
+  --aurora-violet: #4a3a7d;
+  --aurora-iris: #7b64c8;
+  --aurora-periwinkle: #a893e8;
+  --aurora-lilac: #cbb6f2;
+  --aurora-mist: #e9e2f8;
+  --aurora-cream: #f6e7d3;
+  --aurora-peach: #f0b184;
+  --aurora-clay: #d98a63;
+  --aurora-coral: #e2705a;
+  --aurora-sage: #9db08a;
+
+  /* The gradients the accent surfaces are painted with. */
+  --aurora-dusk: linear-gradient(135deg, #a893e8 0%, #7b64c8 46%, #4a3a7d 100%);
+  --aurora-ember: linear-gradient(135deg, #f6e7d3 0%, #f0b184 48%, #d98a63 100%);
+  --aurora-twilight: linear-gradient(120deg, #7b64c8 0%, #a893e8 42%, #f0b184 100%);
+
+  /* The wash that sits between the picture and the interface. Raise the alphas
+     for a calmer, more readable app; lower them to let more of the art through. */
+  --aurora-wash-top: rgba(26, 18, 48, 0.46);
+  --aurora-wash-bottom: rgba(12, 8, 24, 0.72);
+  --aurora-bloom-lilac: rgba(203, 182, 242, 0.20);
+  --aurora-bloom-peach: rgba(240, 177, 132, 0.18);
+
+  /* ======================================================================
+     3. HOW SEE-THROUGH THE APP IS
+     ----------------------------------------------------------------------
+     One number per surface, 0 = invisible, 1 = solid. These are the knobs to
+     reach for first: raise them if text feels hard to read over a bright part
+     of the picture, lower them for more of the art.
+     ====================================================================== */
+  --aurora-alpha-rail: 0.72;    /* server rail, far left */
+  --aurora-alpha-sidebar: 0.52; /* channel list */
+  --aurora-alpha-chat: 0.40;    /* message area */
+  --aurora-alpha-members: 0.46; /* member list, right */
+  --aurora-alpha-panel: 0.50;   /* the user panel at the bottom */
+  --aurora-alpha-bar: 0.34;     /* channel headers and tab bars */
+  --aurora-alpha-card: 0.46;    /* embeds, cards, search results */
+  --aurora-alpha-float: 0.80;   /* menus, popouts, modals — kept higher */
+  --aurora-blur: 18px;          /* the glass itself */
+
+  /* Text. The mist and cream are the two lightest notes in the picture. */
+  --aurora-text: #f3eefc;
+  --aurora-text-soft: #cbbfdd;
+  --aurora-text-faint: #9d8fb5;
+}
+
+/* ==========================================================================
+   4. THE PICTURE ITSELF
+   ========================================================================== */
+body::before {
+  content: "" !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: -2 !important;
+  background-image: var(--aurora-wallpaper) !important;
+  background-position: var(--aurora-wallpaper-position) !important;
+  background-size: var(--aurora-wallpaper-size) !important;
+  background-repeat: no-repeat !important;
+}
+
+/* The dusk wash: a vertical pull-down so text always has a dark base, plus two
+   blooms that put the picture's own colours back into the corners. */
+body::after {
+  content: "" !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: -1 !important;
+  background:
+    radial-gradient(120% 78% at 18% 0%, var(--aurora-bloom-lilac), transparent 62%),
+    radial-gradient(95% 70% at 88% 100%, var(--aurora-bloom-peach), transparent 58%),
+    linear-gradient(180deg, var(--aurora-wash-top), var(--aurora-wash-bottom)) !important;
+  pointer-events: none !important;
+}
+
+/* Discord paints its own opaque backdrop over everything; this is what lets the
+   picture through. `bg_` and `layers_` are Discord's backdrop container names. */
+body,
+#app-mount,
+#app-mount > div,
+#app-mount [class^="app_"],
+#app-mount [class^="bg_"],
+#app-mount [class^="layers_"],
+#app-mount [class*=" app_"] {
+  background: transparent !important;
+}
+
+/* ==========================================================================
+   5. GLASS
+   --------------------------------------------------------------------------
+   Every surface is a translucent fill with a blur behind it. The blur is what
+   keeps text crisp while still showing the picture, and it only costs anything
+   on the surfaces that actually matter.
+   ========================================================================== */
+#app-mount [class^="guilds_"],
+#app-mount [class^="sidebar_"],
+#app-mount [class^="chat_"],
+#app-mount [class^="members_"],
+#app-mount [class^="panels_"],
+#app-mount [class^="container_"][class*="chatContent"],
+#app-mount [class^="peopleColumn_"],
+#app-mount [class^="header_"],
+#app-mount [class^="content_"] > [class^="header_"] {
+  backdrop-filter: blur(var(--aurora-blur)) saturate(118%);
+  -webkit-backdrop-filter: blur(var(--aurora-blur)) saturate(118%);
+}
+
+/* ==========================================================================
+   6. DISCORD'S OWN COLOUR TOKENS
+   --------------------------------------------------------------------------
+   Both generations are set: the classic names Discord still resolves, and the
+   newer base/surface tokens its refreshed components read from. Setting these
+   is what does most of the work — far more durable than chasing class hashes.
+   ========================================================================== */
+:root,
+.theme-dark,
+.theme-darker,
+.theme-midnight {
+  /* --- classic surfaces --- */
+  --background-primary: rgba(18, 12, 34, var(--aurora-alpha-chat));
+  --background-secondary: rgba(14, 9, 28, var(--aurora-alpha-sidebar));
+  --background-secondary-alt: rgba(12, 8, 24, var(--aurora-alpha-members));
+  --background-tertiary: rgba(10, 6, 20, var(--aurora-alpha-rail));
+  --background-accent: rgba(74, 58, 125, 0.55);
+  --background-floating: rgba(20, 13, 38, var(--aurora-alpha-float));
+  --background-nested-floating: rgba(20, 13, 38, var(--aurora-alpha-float));
+  --background-mobile-primary: rgba(18, 12, 34, var(--aurora-alpha-chat));
+  --background-mobile-secondary: rgba(14, 9, 28, var(--aurora-alpha-sidebar));
+
+  /* --- newer base + surface tokens --- */
+  --background-base-lowest: rgba(10, 6, 20, var(--aurora-alpha-rail));
+  --background-base-lower: rgba(12, 8, 24, var(--aurora-alpha-members));
+  --background-base-low: rgba(14, 9, 28, var(--aurora-alpha-sidebar));
+  --background-base: rgba(18, 12, 34, var(--aurora-alpha-chat));
+  --background-surface-high: rgba(20, 13, 38, calc(var(--aurora-alpha-float) - 0.06));
+  --background-surface-higher: rgba(20, 13, 38, var(--aurora-alpha-float));
+  --background-surface-highest: rgba(20, 13, 38, calc(var(--aurora-alpha-float) + 0.06));
+  --background-surface-overlay: rgba(20, 13, 38, var(--aurora-alpha-float));
+
+  /* --- interaction states, tinted rather than greyed --- */
+  --background-modifier-hover: rgba(203, 182, 242, 0.09);
+  --background-modifier-active: rgba(203, 182, 242, 0.14);
+  --background-modifier-selected: rgba(168, 147, 232, 0.20);
+  --background-modifier-accent: rgba(203, 182, 242, 0.12);
+
+  /* --- surfaces that used to be flat grey --- */
+  --channeltextarea-background: rgba(16, 10, 30, 0.58);
+  --activity-card-background: rgba(26, 18, 48, var(--aurora-alpha-card));
+  --modal-background: rgba(20, 13, 38, var(--aurora-alpha-float));
+  --modal-footer-background: rgba(16, 10, 30, var(--aurora-alpha-float));
+  --deprecated-card-bg: rgba(26, 18, 48, var(--aurora-alpha-card));
+  --deprecated-card-editable-bg: rgba(26, 18, 48, calc(var(--aurora-alpha-card) - 0.08));
+  --deprecated-store-bg: transparent;
+  --home-background: transparent;
+
+  /* --- text and icons --- */
+  --text-normal: var(--aurora-text);
+  --text-primary: var(--aurora-text);
+  --text-secondary: var(--aurora-text-soft);
+  --text-muted: var(--aurora-text-faint);
+  --text-faint: var(--aurora-text-faint);
+  --header-primary: var(--aurora-text);
+  --header-secondary: var(--aurora-text-soft);
+  --header-muted: var(--aurora-text-faint);
+  --channels-default: var(--aurora-text-soft);
+  --channel-icon: var(--aurora-text-faint);
+  --interactive-normal: var(--aurora-text-soft);
+  --interactive-hover: var(--aurora-text);
+  --interactive-active: #ffffff;
+  --interactive-muted: rgba(157, 143, 181, 0.55);
+  --icon-primary: var(--aurora-text);
+  --icon-secondary: var(--aurora-text-soft);
+  --icon-muted: var(--aurora-text-faint);
+
+  /* --- the accent: periwinkle into violet, straight off the sky --- */
+  --brand-experiment: #8b78d4;
+  --brand-experiment-100: #f0ebff;
+  --brand-experiment-200: #e0d7fb;
+  --brand-experiment-300: #cbb6f2;
+  --brand-experiment-360: #b6a2ec;
+  --brand-experiment-400: #a893e8;
+  --brand-experiment-430: #9d86e2;
+  --brand-experiment-460: #937bdc;
+  --brand-experiment-500: #8b78d4;
+  --brand-experiment-530: #7b64c8;
+  --brand-experiment-560: #6d57bb;
+  --brand-experiment-600: #5e4aa8;
+  --brand-experiment-630: #513f94;
+  --brand-experiment-660: #45357f;
+  --brand-experiment-700: #3a2d6b;
+  --brand-experiment-730: #32265c;
+  --brand-experiment-760: #2a1f4d;
+  --brand-experiment-800: #23193d;
+  --brand-experiment-830: #1c142f;
+  --brand-experiment-860: #150f23;
+  --brand-experiment-900: #100b1e;
+  --brand-500: #8b78d4;
+  --brand-560: #6d57bb;
+  --brand-600: #5e4aa8;
+  --focus-primary: #b6a2ec;
+  --text-link: #cbb6f2;
+  --text-link-low-saturation: #b6a2ec;
+
+  /* --- mentions pick up the coral from the art --- */
+  --mention-foreground: #ffe9dd;
+  --mention-background: rgba(226, 112, 90, 0.28);
+
+  /* --- scrollbars: a thin gradient rail instead of a grey slab --- */
+  --scrollbar-thin-thumb: rgba(168, 147, 232, 0.55);
+  --scrollbar-thin-track: transparent;
+  --scrollbar-auto-thumb: rgba(168, 147, 232, 0.5);
+  --scrollbar-auto-track: rgba(12, 8, 24, 0.28);
+  --scrollbar-auto-scrollbar-color-thumb: rgba(168, 147, 232, 0.5);
+  --scrollbar-auto-scrollbar-color-track: rgba(12, 8, 24, 0.28);
+
+  /* --- borders and dividers, kept faint --- */
+  --border-subtle: rgba(203, 182, 242, 0.14);
+  --border-strong: rgba(203, 182, 242, 0.22);
+  --border-muted: rgba(203, 182, 242, 0.10);
+  --divider-color: rgba(203, 182, 242, 0.12);
+
+  /* --- status colours, warmed to sit in the picture --- */
+  --status-danger: #e2705a;
+  --status-warning: #f0b184;
+  --status-positive: #9db08a;
+}
+
+/* ==========================================================================
+   7. GRADIENTS
+   --------------------------------------------------------------------------
+   The accent surfaces — selected channel, unread pills, primary buttons,
+   scrollbars — wear the picture's own periwinkle-to-peach sweep instead of a
+   flat fill.
+   ========================================================================== */
+
+/* The selected channel gets a sweep that fades out to the right, so the
+   sidebar still reads as one surface. */
+#app-mount [class^="modeSelected_"] [class^="link_"],
+#app-mount [class*=" modeSelected_"] [class^="link_"],
+#app-mount [class^="modeSelected_"],
+#app-mount [class*=" modeSelected_"] {
+  background: linear-gradient(90deg, rgba(168, 147, 232, 0.30), rgba(240, 177, 132, 0.10) 78%, transparent) !important;
+  border-radius: 8px;
+}
+
+/* Unread and mention pills: the ember gradient, with dark ink for contrast. */
+#app-mount [class^="numberBadge_"],
+#app-mount [class*=" numberBadge_"],
+#app-mount [class^="mentionsBadge_"] {
+  background: var(--aurora-ember) !important;
+  color: #3a2415 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 10px rgba(226, 112, 90, 0.35) !important;
+}
+
+/* Primary actions on the dusk gradient. */
+#app-mount [class^="lookFilled_"][class^="colorBrand_"],
+#app-mount [class^="lookFilled_"][class*=" colorBrand_"],
+#app-mount [class^="colorBrand_"][class*=" lookFilled_"],
+#app-mount [class*="colorBrand_"][class*="lookFilled_"] {
+  background: var(--aurora-dusk) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(233, 226, 248, 0.28) !important;
+  transition: filter 120ms ease, transform 120ms ease;
+}
+
+#app-mount [class^="lookFilled_"][class*="colorBrand_"]:hover,
+#app-mount [class*="lookFilled_"][class*="colorBrand_"]:hover {
+  filter: brightness(1.08) saturate(1.05);
+}
+
+/* Same sweep on the scrollbar thumb, so the rails feel part of the theme. */
+#app-mount ::-webkit-scrollbar-thumb,
+#app-mount ::-webkit-scrollbar-thumb:hover {
+  background-image: linear-gradient(180deg, rgba(203, 182, 242, 0.75), rgba(240, 177, 132, 0.65)) !important;
+  background-color: transparent !important;
+  border-radius: 8px;
+}
+
+/* The "new messages" rule and unread dot, in the coral note. */
+#app-mount [class^="newMessagesBar_"],
+#app-mount [class*=" newMessagesBar_"] {
+  background: linear-gradient(90deg, rgba(226, 112, 90, 0.92), rgba(240, 177, 132, 0.88)) !important;
+  color: #2a1509 !important;
+}
+
+/* Selected/hovered items in menus and the member list keep the tint subtle. */
+#app-mount [class^="menu_"] [class*="focused_"],
+#app-mount [class^="menu_"] [class*="colorDefault"] {
+  border-radius: 6px;
+}
+
+/* ==========================================================================
+   8. YOUR PROFILE IS LEFT ALONE — ON PURPOSE
+   --------------------------------------------------------------------------
+   This is the fix for "I change my appearance and my profile stays the same".
+
+   Discord's profile theme (the colours you pick to paint your own profile and
+   the user panel at the bottom left) is published as --profile-gradient-*,
+   --user-profile-* and --profile-body-background-color. Several popular
+   themes — Novum among them — hardcode those, so your choice is overridden and
+   the profile never seems to change.
+
+   Nothing in this theme sets any of them. Your profile therefore keeps
+   following your Discord settings, and the surfaces behind it are already
+   translucent, so it still sits inside the glass.
+
+   If you would rather force a fixed profile look, uncomment the block below.
+   ========================================================================== */
+
+/*
+:root {
+  --profile-gradient-primary-color: #4a3a7d;
+  --profile-gradient-secondary-color: #291d47;
+  --profile-gradient-overlay-color: rgba(16, 11, 30, 0.55);
+  --profile-gradient-button-color: #7b64c8;
+  --profile-body-background-color: rgba(20, 13, 38, 0.82);
+  --profile-activity-background-color: rgba(74, 58, 125, 0.45);
+}
+*/
+
+/* The user panel and profile popout still get the glass treatment, so they sit
+   on the picture the same way everything else does — without touching colour. */
+#app-mount [class^="panels_"],
+#app-mount [class^="userPanelInner_"],
+#app-mount [class^="userPanel_"],
+#app-mount [class^="outer_"] [class^="inner_"] {
+  backdrop-filter: blur(var(--aurora-blur)) saturate(118%);
+  -webkit-backdrop-filter: blur(var(--aurora-blur)) saturate(118%);
+}
+
+/* ==========================================================================
+   9. SMALL POLISH
+   ========================================================================== */
+
+/* Cards, embeds and code blocks: translucent, with a faint lilac rim. */
+#app-mount [class^="embedFull_"],
+#app-mount [class*=" embedFull_"],
+#app-mount [class^="markup_"] code,
+#app-mount [class^="markup_"] pre,
+#app-mount [class^="card_"] {
+  background: rgba(26, 18, 48, var(--aurora-alpha-card)) !important;
+  border-color: rgba(203, 182, 242, 0.16) !important;
+  backdrop-filter: blur(calc(var(--aurora-blur) * 0.6));
+  -webkit-backdrop-filter: blur(calc(var(--aurora-blur) * 0.6));
+}
+
+/* The reply bar and the composer are the two things you look at most, so they
+   stay a touch more solid than the rest. */
+#app-mount [class^="channelTextArea_"],
+#app-mount [class*="replying_"] {
+  background: rgba(16, 10, 30, 0.62) !important;
+  border: 1px solid rgba(203, 182, 242, 0.16) !important;
+}
+
+/* Attachments and images get a soft frame so they do not float on the picture. */
+#app-mount [class^="imageWrapper_"],
+#app-mount [class^="embedWrapper_"] {
+  border-radius: 10px;
+}
+
+/* A whisper of lilac on hover of a message, so the eye can follow it. */
+#app-mount [class^="message_"][class*=" "]:hover {
+  background: linear-gradient(90deg, rgba(203, 182, 242, 0.07), transparent 70%) !important;
+}
+
+/* Tooltips stay legible: they are the one thing allowed to be opaque. */
+#app-mount [class^="tooltip_"],
+#app-mount [class*="tooltipPrimary"] {
+  background: rgba(16, 10, 30, 0.94) !important;
+  color: var(--aurora-text) !important;
+  border: 1px solid rgba(203, 182, 242, 0.18);
+}
+
+/* Title bars and headers, faintly swept so the app has a top edge again. */
+#app-mount [class^="title_"],
+#app-mount [class^="header_"][class*=" "] {
+  background-image: linear-gradient(180deg, rgba(203, 182, 242, 0.06), transparent) !important;
+}
+
+/* Light mode is not supported: the theme is built for the dark base. */
+.theme-light {
+  --background-primary: rgba(18, 12, 34, var(--aurora-alpha-chat));
+  --background-secondary: rgba(14, 9, 28, var(--aurora-alpha-sidebar));
+  --text-normal: var(--aurora-text);
+}

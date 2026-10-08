@@ -1,0 +1,12 @@
+.DS_Store
+Thumbs.db
+*.log
+
+# Editor and tooling
+.vscode/
+.idea/
+node_modules/
+
+# Local scratch
+preview/
+*.local.css
